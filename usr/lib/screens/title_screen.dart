@@ -68,9 +68,53 @@ class TitleScreen extends StatelessWidget {
                 ),
                 child: const Text("INITIALIZE LINK"),
               ),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () => _showHowToPlay(context),
+                child: const Text(
+                  "HOW TO PLAY",
+                  style: TextStyle(color: Colors.cyanAccent, fontSize: 16),
+                ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showHowToPlay(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text("MANUAL_OVERRIDE.TXT", style: TextStyle(color: Colors.cyanAccent)),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("OBJECTIVE:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              Text("Survive, explore, and level up in a world of magic and machines.", style: TextStyle(color: Colors.white70)),
+              SizedBox(height: 10),
+              Text("CONTROLS:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              Text("• TRAVEL: Move to a new location. Risk of enemy encounter.", style: TextStyle(color: Colors.white70)),
+              Text("• ATTACK: Basic physical damage.", style: TextStyle(color: Colors.white70)),
+              Text("• SPELL: High damage, costs Energy.", style: TextStyle(color: Colors.white70)),
+              Text("• SCAVENGE: Search for credits or potions.", style: TextStyle(color: Colors.white70)),
+              SizedBox(height: 10),
+              Text("TIPS:", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              Text("• Don't travel while in combat.", style: TextStyle(color: Colors.white70)),
+              Text("• Use potions when HP is low.", style: TextStyle(color: Colors.white70)),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("CLOSE", style: TextStyle(color: Colors.cyanAccent)),
+          ),
+        ],
       ),
     );
   }

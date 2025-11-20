@@ -20,10 +20,6 @@ class _AdventureScreenState extends State<AdventureScreen> {
 
   void _updateState() {
     setState(() {});
-    // Auto-scroll to top of log (which is actually the latest message since we insert at 0)
-    // But if we display it normally (top to bottom), we might want to scroll to bottom.
-    // Let's display list reversed so index 0 is at the bottom visually? 
-    // Or just keep index 0 at top. Let's keep index 0 at top for "Latest News".
   }
 
   // --- Actions ---
@@ -197,7 +193,7 @@ class _AdventureScreenState extends State<AdventureScreen> {
         ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
-            value: current / max,
+            value: max > 0 ? current / max : 0,
             backgroundColor: color.withOpacity(0.2),
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: 8,
@@ -259,17 +255,15 @@ class _AdventureScreenState extends State<AdventureScreen> {
                 color: Colors.black,
                 border: Border.all(color: Colors.cyanAccent.withOpacity(0.5)),
                 borderRadius: BorderRadius.circular(8),
-                image: const DecorationImage(
-                  image: NetworkImage("https://placeholder.com/wp-content/uploads/2018/10/placeholder.com-logo1.png"), // Placeholder, we will use colors/icons
-                  fit: BoxFit.cover,
-                  opacity: 0.2,
-                ),
+                // Removed NetworkImage to prevent web preview CORS issues
+                // Using gradient and icons instead
               ),
               child: Stack(
                 children: [
                   // Background gradient based on location type
                   Container(
                     decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -278,6 +272,13 @@ class _AdventureScreenState extends State<AdventureScreen> {
                     ),
                   ),
                   
+                  // Decorative Grid Pattern (Cyberpunk feel)
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: GridPainter(color: Colors.cyanAccent.withOpacity(0.1)),
+                    ),
+                  ),
+
                   // Location Info
                   Positioned(
                     top: 16,
@@ -311,10 +312,17 @@ class _AdventureScreenState extends State<AdventureScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            _getEnemyIcon(_gameState.currentEnemy!.type),
-                            size: 100,
-                            color: Colors.redAccent,
+                          TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 0.8, end: 1.0),
+                            duration: const Duration(milliseconds: 500),
+                            builder: (context, value, child) {
+                              return Transform.scale(scale: value, child: child);
+                            },
+                            child: Icon(
+                              _getEnemyIcon(_gameState.currentEnemy!.type),
+                              size: 100,
+                              color: Colors.redAccent,
+                            ),
                           ),
                           const SizedBox(height: 10),
                           Container(
@@ -383,7 +391,6 @@ class _AdventureScreenState extends State<AdventureScreen> {
                 _buildActionButton("HEAL", Icons.local_hospital, _heal, Colors.greenAccent),
                 _buildActionButton("TRAVEL", Icons.map, _travel, Colors.orangeAccent),
                 _buildActionButton("SCAVENGE", Icons.search, _scavenge, Colors.amber),
-                // Placeholder for more actions
                 _buildActionButton("INVENTORY", Icons.backpack, () {
                    _gameState.addLog("Inventory: ${_gameState.inventory.join(', ')}");
                    _updateState();
@@ -444,7 +451,7 @@ class _AdventureScreenState extends State<AdventureScreen> {
     switch (type) {
       case LocationType.city: return Icons.location_city;
       case LocationType.wilderness: return Icons.forest;
-      case LocationType.dungeon: return Icons.castle; // Old fantasy castle
+      case LocationType.dungeon: return Icons.castle;
       case LocationType.cyberSpace: return Icons.hub;
     }
   }
@@ -457,4 +464,30 @@ class _AdventureScreenState extends State<AdventureScreen> {
       case EnemyType.hybrid: return Icons.android;
     }
   }
+}
+
+// Simple painter for a retro grid effect
+class GridPainter extends CustomPainter {
+  final Color color;
+  GridPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+
+    const step = 40.0;
+    
+    for (double x = 0; x < size.width; x += step) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    
+    for (double y = 0; y < size.height; y += step) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
